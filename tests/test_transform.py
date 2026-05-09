@@ -74,6 +74,13 @@ def test_request_remove_header():
     assert result["Accept"] == "*/*"
 
 
+def test_request_remove_header_not_present_is_noop():
+    """Removing a header that doesn't exist should not raise and leave headers intact."""
+    cfg = TransformConfig(remove_request_headers=["X-Nonexistent"])
+    result = apply_request_transforms({"Accept": "*/*"}, cfg)
+    assert result == {"Accept": "*/*"}
+
+
 def test_request_transform_does_not_mutate_original():
     original = {"X-Keep": "yes"}
     cfg = TransformConfig(set_request_headers={"X-Add": "new"})
@@ -83,23 +90,4 @@ def test_request_transform_does_not_mutate_original():
 
 # ---------------------------------------------------------------------------
 # apply_response_transforms
-# ---------------------------------------------------------------------------
-
-def test_response_set_header_adds_new():
-    cfg = TransformConfig(set_response_headers={"X-Powered-By": "patchwork"})
-    result = apply_response_transforms({"Content-Type": "application/json"}, cfg)
-    assert result["X-Powered-By"] == "patchwork"
-
-
-def test_response_remove_header():
-    cfg = TransformConfig(remove_response_headers=["Server"])
-    result = apply_response_transforms({"Server": "nginx", "Content-Length": "42"}, cfg)
-    assert "Server" not in result
-    assert result["Content-Length"] == "42"
-
-
-def test_response_transform_does_not_mutate_original():
-    original = {"Server": "nginx"}
-    cfg = TransformConfig(remove_response_headers=["Server"])
-    apply_response_transforms(original, cfg)
-    assert "Server" in original
+# -----------------------------

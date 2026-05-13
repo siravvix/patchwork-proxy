@@ -69,6 +69,12 @@ def test_invalidate_removes_entry(cache: ResponseCache) -> None:
     assert cache.get("GET", "http://example.com/api") is None
 
 
+def test_invalidate_nonexistent_entry_is_noop(cache: ResponseCache) -> None:
+    """Invalidating a key that was never stored should not raise."""
+    cache.invalidate("GET", "http://example.com/does-not-exist")
+    assert cache.size == 0
+
+
 def test_clear_empties_cache(cache: ResponseCache) -> None:
     cache.put("GET", "http://example.com/a", 200, _HEADERS, _BODY)
     cache.put("GET", "http://example.com/b", 200, _HEADERS, _BODY)
